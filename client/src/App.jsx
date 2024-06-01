@@ -90,6 +90,7 @@ function App() {
                   type="text"
                   className="form-control"
                   placeholder="write a message"
+                  value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
