@@ -1,7 +1,33 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { socket } from "./index";
 
 function App() {
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    socket.on("message", (msg) => {
+      setMessages((messages) => [...messages, msg]);
+    });
+
+    return () => {
+      socket.off("message");
+    };
+  });
+
+  const submit = async (e) => {
+    e.preventDefault();
+
+    await axios.post("http://localhost:5000/api/message", {
+      message,
+    });
+
+    setMessage("");
+  };
+
   return (
     <>
       <div className="container">
@@ -29,7 +55,23 @@ function App() {
             </div>
 
             <div id="conversation" className="py-3 lh-sm border-bottom">
-              <div className="row p-2">
+              {messages.map((m) => {
+                return (
+                  <div className="row p-2" key={m}>
+                    <div className="col-6">
+                      <div
+                        className="d-inline-block alert alert-primary"
+                        role="alert"
+                      >
+                        {m}
+                      </div>
+                    </div>
+                    <div className="col-6"></div>
+                  </div>
+                );
+              })}
+
+              {/* <div className="row p-2">
                 <div className="col-6">
                   <div
                     className="d-inline-block alert alert-primary"
@@ -39,27 +81,16 @@ function App() {
                   </div>
                 </div>
                 <div className="col-6"></div>
-              </div>
-
-              <div className="row p-2">
-                <div className="col-6"></div>
-                <div className="col-6">
-                  <div
-                    className="d-inline-block alert alert-success float-end"
-                    role="alert"
-                  >
-                    Hello There
-                  </div>
-                </div>
-              </div>
+              </div> */}
             </div>
 
-            <form id="reply" className="p-3 w-100">
+            <form id="reply" className="p-3 w-100" onSubmit={submit}>
               <div className="input-group">
                 <input
                   type="text"
                   className="form-control"
                   placeholder="write a message"
+                  onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
             </form>
